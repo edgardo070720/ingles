@@ -73,17 +73,30 @@ function R() {
     b = `
       <div class="c">
         <h2>¡Gracias!</h2>
-        <p>Tu prueba fue enviada. El colegio revisará tus resultados y se pondrá en contacto contigo.</p>
+        <p>Tu prueba fue enviada exitosamente. El colegio revisará tus resultados y se pondrá en contacto contigo.</p>
+        ${getGoogleSheetUrl() ? '<p class="tag" style="background:#e2f6ea;color:#137333">✓ Registro guardado y sincronizado con Google Sheets</p>' : ''}
         <p><button class="s" onclick="S.v='home';R()">Volver al inicio</button></p>
       </div>
     `;
   } else if (S.v == 'pin') {
     b = `
-      <div class="c">
-        <h2>Acceso docente</h2>
-        <label>PIN</label>
-        <input id="pn" type="password" style="max-width:200px" placeholder="PIN docente" onkeydown="if(event.key==='Enter')$('#btnPin').click()">
-        <p><button id="btnPin" onclick="if($('#pn').value==D.pin){S.ok=1;S.v='admin';R()}else toast('PIN incorrecto.')">Entrar</button></p>
+      <div class="c" style="max-width:400px;margin:30px auto">
+        <h2>🔒 Acceso Docente</h2>
+        <p style="font-size:14px;color:var(--mu)">
+          Ingresa el PIN de seguridad ${getGoogleSheetUrl() ? '(validado en la nube con Google Sheets)' : ''}.
+        </p>
+        <div style="position:relative;margin:14px 0">
+          <input id="pn" type="password" placeholder="PIN de acceso" onkeydown="if(event.key==='Enter')doLoginPin()" style="padding-right:45px">
+          <button type="button" class="s" onclick="
+            const i = $('#pn');
+            i.type = i.type === 'password' ? 'text' : 'password';
+            this.textContent = i.type === 'password' ? '👁️' : '🔒';
+          " style="position:absolute;right:6px;top:6px;padding:4px 8px;border:0;background:transparent;cursor:pointer" title="Mostrar/ocultar">👁️</button>
+        </div>
+        <p>
+          <button id="btnPin" onclick="doLoginPin()">Entrar</button>
+          <button class="s" onclick="S.v='home';R()">Cancelar</button>
+        </p>
       </div>
     `;
   } else if (S.v == 'admin') {
@@ -106,6 +119,56 @@ function R() {
     ${m ? `<div class="m np">${esc(m)}</div>` : ''}
     ${b}
   `;
+}
+
+/**
+ * Handles teacher login verification and rate-limiting.
+ */
+async function doLoginPin() {
+  const pinInput = $('#pn');
+  if (!pinInput) return;
+  const pin = pinInput.value.trim();
+  if (!pin) return toast('Por favor ingresa el PIN.');
+
+  if (S.lockoutUntil && Date.now() < S.lockoutUntil) {
+    const remaining = Math.ceil((S.lockoutUntil - Date.now()) / 1000);
+    return toast(`Demasiados intentos erróneos. Espera ${remaining} segundos.`);
+  }
+
+  const btn = $('#btnPin');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+  }
+
+  try {
+    const res = await verifyTeacherPin(pin);
+    if (res.ok) {
+      S.ok = 1;
+      S.failedPinAttempts = 0;
+      S.v = 'admin';
+      R();
+      toast('Acceso concedido (' + (res.source || 'Seguro') + ').');
+    } else {
+      S.failedPinAttempts = (S.failedPinAttempts || 0) + 1;
+      if (S.failedPinAttempts >= 4) {
+        S.lockoutUntil = Date.now() + 30000;
+        toast('❌ Acceso bloqueado por 30 segundos tras 4 intentos fallidos.');
+      } else {
+        toast('❌ ' + (res.error || 'PIN incorrecto.'));
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+  } catch (e) {
+    toast('Error verificando PIN: ' + e.message);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  }
 }
 
 // Bootstrap on DOM ready

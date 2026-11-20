@@ -50,3 +50,13 @@ El código ha sido modularizado para facilitar su lectura, mantenimiento y evolu
   * Informes individuales imprimibles o exportables a PDF.
   * Banco de preguntas editable (añadir, editar, filtrar y eliminar).
   * Guiones de dictados listos para imprimir o apoyar con voz de navegador.
+  * **Conexión con Google Sheets:** Sincronización en la nube mediante Apps Script.
+
+---
+
+## Persistencia con Google Sheets
+
+Para registrar los resultados en tiempo real en una hoja de Google Sheets:
+1. Revisa el script en [`google-apps-script/Code.gs`](file:///home/ing-edgardo-ramos/Documentos/ingles/google-apps-script/Code.gs).
+2. Sigue los pasos de la guía detallada en [`google-apps-script/INSTRUCCIONES.md`](file:///home/ing-edgardo-ramos/Documentos/ingles/google-apps-script/INSTRUCCIONES.md).
+3. Pega la URL del Web App en el panel docente (**Ajustes** > **Persistencia en Google Sheets**) o configúrala en [`js/config.js`](file:///home/ing-edgardo-ramos/Documentos/ingles/js/config.js).

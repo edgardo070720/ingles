@@ -8,6 +8,9 @@ const LOGO = 'assets/logo.png';
 // Google Sheets Webhook URL (Default or fallback)
 const DEFAULT_SHEET_URL = '';
 
+// Default Teacher PIN Hash (SHA-256 for '1234')
+const DEFAULT_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+
 // CEFR Levels
 const L = ['Pre-A1', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 

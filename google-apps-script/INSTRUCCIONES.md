@@ -73,3 +73,26 @@ Cada vez que un estudiante finaliza su prueba, se genera una fila con:
 * **Speaking:** Indicador de grabación
 * **Observaciones y notas del docente**
 * **Backup JSON completo** de la prueba
+
+---
+
+### Seguridad y Gestión del PIN Docente
+
+1. **Almacenamiento Seguro (SHA-256):**
+   * El PIN no se guarda en texto plano en ningún lugar.
+   * En la hoja de cálculo se crea automáticamente una pestaña oculta o protegida llamada `_Config`, donde se almacena el hash criptográfico del PIN.
+   * El PIN inicial por defecto es `1234`.
+
+2. **Cómo cambiar el PIN:**
+   * Entra al panel como docente y ve a **Ajustes** > **Seguridad y PIN de Acceso Docente**.
+   * Ingresa tu PIN actual, tu nuevo PIN (mínimo 4 caracteres) y confírmalo.
+   * Al pulsar **Actualizar PIN**, se actualiza inmediatamente en tu hoja de Google Sheets y en tu navegador.
+
+3. **Reinicio de Emergencia (Si olvidas el PIN):**
+   * Abre tu hoja de Google Sheets.
+   * Ve a la pestaña **`_Config`**.
+   * En la fila que dice **`REINICIO_EMERGENCIA`**, escribe la palabra:
+     ```text
+     RESET
+     ```
+   * En la siguiente verificación que hagas desde la aplicación, el PIN volverá a ser automáticamente el original: **`1234`**.

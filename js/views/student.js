@@ -126,6 +126,12 @@ function finish() {
 
   D.att.unshift(a);
   save();
+
+  // Automatically send to Google Sheets if configured
+  if (getGoogleSheetUrl()) {
+    sendToGoogleSheets(a).catch(err => console.error('Error enviando a Google Sheets:', err));
+  }
+
   S.v = 'done';
   R();
 }

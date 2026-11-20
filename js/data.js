@@ -3,7 +3,7 @@
  */
 
 function seed(){const Q=(sk,lv,tp,q,o,a,x)=>({id:uid(),sk,lv,tp,type:o?'mcq':a?'text':'open',q,opts:o||[],ans:a||'',pts:o||a?1:0,g1:0,g2:11,txt:'',img:'',aud:'',script:'',...x});
-return{pin:'1234',th:60,topics:['Daily life','Family & home','School','Travel','Environment','Work & society'],att:[],qs:[
+return{pinHash:DEFAULT_PIN_HASH,th:60,topics:['Daily life','Family & home','School','Travel','Environment','Work & society'],att:[],qs:[
 Q('Reading','Pre-A1','School','Look: 🐱 What is it?',['cat','dog','bird'],'cat'),
 Q('Reading','A1','Family & home','How old is Ana?',['Seven','Nine','Ten'],'Nine',{txt:'My name is Ana. I am nine. I have a dog. His name is Rex.'}),
 Q('Reading','A2','Travel','How much is a child’s ticket?',['$20','$40','$60'],'$20',{txt:'The train to Bogotá leaves at 8:30 and arrives at 2:00. Tickets cost $40 for adults and $20 for children.'}),
@@ -23,7 +23,7 @@ Q('Speaking','B2','School','Talk for one minute: should students wear uniforms? 
 function seed2(){const M={R:'Reading',L:'Listening',W:'Writing',S:'Speaking'},
 Q=(s,g,k,t,lv,q,o,a,x)=>({id:uid(),sk:M[s],lv,tp:`${g}° ${k=='G'?'Grammar':'Oral'} · ${t}`,type:o?'mcq':a?'text':'open',q,opts:o||[],ans:a||'',pts:o||a?1:0,g1:g,g2:Math.min(g+1,5),txt:'',img:'',aud:'',script:'',...x}),
 tp=Object.entries(TP).flatMap(([g,[a,b]])=>[...a.split('|').map(t=>`${g}° Grammar · ${t}`),...b.split('|').map(t=>`${g}° Oral · ${t}`)]);
-return{v:2,pin:'1234',th:60,topics:tp,att:[],qs:[
+return{v:2,pinHash:DEFAULT_PIN_HASH,th:60,topics:tp,att:[],qs:[
 Q('L',1,'O','Animals','Pre-A1','Listen to your teacher and write exactly what you hear.',null,null,{type:'dict',script:'I see a cat. The cat is black.'}),
 Q('L',1,'O','Classroom objects','A1','Listen to your teacher and write exactly what you hear.',null,null,{type:'dict',script:'I have a blue bag. My book is on the desk.'}),
 Q('L',2,'O','Daily routines','A1','Listen to your teacher and write exactly what you hear.',null,null,{type:'dict',script:'I get up at seven o’clock. I eat breakfast with my mother and my brother. Then I go to school by bus.'}),

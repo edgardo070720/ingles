@@ -58,7 +58,11 @@ function rep(a) {
     )
     .flat();
 
-  let h = `<div class="c"><div class="t np"><button class="s" onclick="S.v='admin';R()">← Volver</button><button onclick="print()">Imprimir / guardar PDF</button></div><img src="${LOGO}" alt="Colegio Increart" style="height:60px;background:#fff;border-radius:8px;padding:4px"><h2>Informe de admisión · English Placement Test</h2><p><b>${esc(
+  let h = `<div class="c"><div class="t np">
+    <button class="s" onclick="S.v='admin';R()">← Volver</button>
+    <button onclick="print()">Imprimir / guardar PDF</button>
+    <button class="s" onclick="sendToGoogleSheets(D.att.find(x=>x.id=='${a.id}')).then(r=>toast(r.ok?'✅ Sincronizado con Google Sheets':'❌ Error al sincronizar: '+r.error))">📤 Enviar a Google Sheets</button>
+  </div><img src="${LOGO}" alt="Colegio Increart" style="height:60px;background:#fff;border-radius:8px;padding:4px"><h2>Informe de admisión · English Placement Test</h2><p><b>${esc(
     a.n
   )}</b> · Grado al que aspira: ${G[a.g]} · ${new Date(a.d).toLocaleDateString('es-CO')}</p>
 

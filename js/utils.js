@@ -37,6 +37,21 @@ const au = q => (q.aud && q.aud[0] == '@' ? (D.audios || {})[q.aud.slice(1)] || 
 // Progress bar HTML snippet
 const bar = p => `<div class="bar"><i style="width:${p}%"></i></div>`;
 
+/**
+ * Computes SHA-256 hash of a string using Web Crypto API.
+ */
+async function hashPin(pin) {
+  const str = String(pin || '').trim();
+  if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  return DEFAULT_PIN_HASH;
+}
+
 // Toast notification helper
 const toast = m => {
   S.m = m;

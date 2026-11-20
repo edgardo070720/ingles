@@ -235,7 +235,9 @@ function admin() {
 
   // Aspirantes / Attempts Tab
   if (S.tab == 'att') {
-    h += `<div class="c ov"><table><tr><th>Aspirante</th><th>Grado</th><th>Fecha</th><th>Nivel</th><th>Estado</th><th></th></tr>${
+    h += `<div class="c"><div class="t" style="margin-bottom:10px">
+      <button class="s" onclick="syncAllToGoogleSheets()">📤 Sincronizar con Google Sheets</button>
+    </div><div class="ov"><table><tr><th>Aspirante</th><th>Grado</th><th>Fecha</th><th>Nivel</th><th>Estado</th><th></th></tr>${
       D.att
         .map(a => {
           const r = an(a);
@@ -248,7 +250,7 @@ function admin() {
           }',()=>{D.att=D.att.filter(x=>x.id!='${a.id}');save();R()})">✕</button></td></tr>`;
         })
         .join('') || '<tr><td colspan="6">Aún no hay aspirantes.</td></tr>'
-    }</table></div>`;
+    }</table></div></div>`;
   }
 
   // Question Bank Tab
@@ -316,15 +318,67 @@ function admin() {
 
   // Settings Tab
   if (S.tab == 'set') {
-    h += `<div class="c"><label>% mínimo de aciertos para acreditar un nivel (Reading/Listening)</label><input type="number" min="30" max="100" value="${
-      D.th
-    }" onchange="D.th=+this.value;save()"><label>Voz del Listening (inglés de EE. UU.)</label><select onchange="D.voice=this.value;save()"><option value="">Automática (recomendada)</option>${vs()
-      .map(v => `<option${v.name == D.voice ? ' selected' : ''}>${esc(v.name)}</option>`)
-      .join('')}</select><p><button class="s" onclick="testV()">▶ Probar voz</button> <span class="tag">${
-      vs().length
-    } voces encontradas en este equipo</span></p><label>PIN docente</label><input value="${esc(
-      D.pin
-    )}" onchange="D.pin=this.value;save()"><p class="tag">Los datos se guardan en este navegador. El PIN es una barrera básica, no seguridad real.</p><p><button class="d" onclick="cf('reset',()=>{localStorage.removeItem('ept3');load();R()})">Restablecer todo</button></p></div>`;
+    h += `<div class="c">
+      <h3>Configuración General</h3>
+      <label>% mínimo de aciertos para acreditar un nivel (Reading/Listening)</label>
+      <input type="number" min="30" max="100" value="${D.th}" onchange="D.th=+this.value;save()">
+      <label>Voz del Listening (inglés de EE. UU.)</label>
+      <select onchange="D.voice=this.value;save()">
+        <option value="">Automática (recomendada)</option>
+        ${vs().map(v => `<option${v.name == D.voice ? ' selected' : ''}>${esc(v.name)}</option>`).join('')}
+      </select>
+      <p><button class="s" onclick="testV()">▶ Probar voz</button> <span class="tag">${vs().length} voces encontradas en este equipo</span></p>
+      <hr style="border:0;border-top:1px solid var(--bd);margin:20px 0">
+
+      <h3>Seguridad y PIN de Acceso Docente</h3>
+      <p class="tag" style="background:#e8f0ff;color:var(--pr);margin-bottom:12px">
+        El PIN está protegido con hash SHA-256 ${getGoogleSheetUrl() ? 'y sincronizado con Google Sheets' : '(modo local)'}.
+      </p>
+
+      <div class="g" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+        <div>
+          <label>PIN Actual</label>
+          <input id="curPin" type="password" placeholder="PIN actual">
+        </div>
+        <div>
+          <label>Nuevo PIN</label>
+          <input id="newPin" type="password" placeholder="Mínimo 4 dígitos">
+        </div>
+        <div>
+          <label>Confirmar Nuevo PIN</label>
+          <input id="cfmPin" type="password" placeholder="Repite nuevo PIN">
+        </div>
+      </div>
+      <p style="margin-top:10px">
+        <button class="s" onclick="
+          const c = $('#curPin').value, n = $('#newPin').value, f = $('#cfmPin').value;
+          changeTeacherPin(c, n, f).then(res => {
+            if (res.ok) {
+              toast(res.message);
+              $('#curPin').value = ''; $('#newPin').value = ''; $('#cfmPin').value = '';
+            } else {
+              toast('❌ ' + res.error);
+            }
+          });
+        ">Actualizar PIN</button>
+      </p>
+      <p class="tag">💡 Si olvidas el PIN, abre tu Google Sheet, ve a la pestaña <b>_Config</b> y escribe <b>RESET</b> en la celda de emergencia para restaurarlo a '1234'.</p>
+
+      <hr style="border:0;border-top:1px solid var(--bd);margin:20px 0">
+
+      <h3>Persistencia en Google Sheets</h3>
+      <label>URL de la Aplicación Web (Google Apps Script Webhook)</label>
+      <input value="${esc(D.sheetUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" onchange="D.sheetUrl=this.value.trim();save()">
+      <p class="tag">Cada aspirante que termine el test sincronizará su resultado en esta hoja en tiempo real.</p>
+      <p>
+        <button class="s" onclick="testGoogleSheetsConnection()">▶ Probar conexión</button>
+        <button class="s" onclick="syncAllToGoogleSheets()">📤 Sincronizar todos los aspirantes</button>
+      </p>
+
+      <hr style="border:0;border-top:1px solid var(--bd);margin:20px 0">
+
+      <p><button class="d" onclick="cf('reset',()=>{localStorage.removeItem('ept3');load();R()})">Restablecer todo</button></p>
+    </div>`;
   }
 
   return h;
