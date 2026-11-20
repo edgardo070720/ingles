@@ -5,8 +5,8 @@
 // School branding & logo path
 const LOGO = 'assets/logo.png';
 
-// Google Sheets Webhook URL (Default or fallback)
-const DEFAULT_SHEET_URL = '';
+// Google Sheets Webhook URL (Official deployment endpoint)
+const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzgsGFjzbXP4Ejt7YSJf7zOxu-WKEbNtat4iHib29R0eQ5SH-PP523fBJKdoAxSnYh27w/exec';
 
 // Default Teacher PIN Hash (SHA-256 for '1234')
 const DEFAULT_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';

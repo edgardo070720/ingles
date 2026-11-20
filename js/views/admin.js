@@ -366,13 +366,31 @@ function admin() {
 
       <hr style="border:0;border-top:1px solid var(--bd);margin:20px 0">
 
-      <h3>Persistencia en Google Sheets</h3>
-      <label>URL de la Aplicación Web (Google Apps Script Webhook)</label>
-      <input value="${esc(D.sheetUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" onchange="D.sheetUrl=this.value.trim();save()">
-      <p class="tag">Cada aspirante que termine el test sincronizará su resultado en esta hoja en tiempo real.</p>
-      <p>
+      <h3>Persistencia Global en Google Sheets (GitHub Pages)</h3>
+      ${
+        DEFAULT_SHEET_URL
+          ? `<p class="tag" style="background:#e2f6ea;color:#137333;margin-bottom:8px">
+              ✅ URL Global Activa en el repositorio (visible para todos los docentes y estudiantes).
+            </p>
+            <label>URL Oficial del Despliegue (configurada en js/config.js)</label>
+            <input value="${esc(DEFAULT_SHEET_URL)}" readonly style="opacity:0.85;background:var(--sf)">`
+          : `<p class="tag" style="background:#fff1db;color:#c77700;margin-bottom:8px">
+              ⚠️ Aún no se ha fijado la URL en el repositorio (js/config.js).
+            </p>`
+      }
+
+      <label style="margin-top:10px">URL de Google Sheets (Web App / Apps Script)</label>
+      <input id="inpSheetUrl" value="${esc(DEFAULT_SHEET_URL || D.sheetUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" onchange="D.sheetUrl=this.value.trim();save()">
+      <p class="tag">Para que todos los docentes y aspirantes desde cualquier equipo usen la misma hoja sin tener que configurarla, la URL debe colocarse en <code>js/config.js</code> y subirse a GitHub.</p>
+      <p style="margin-top:10px">
         <button class="s" onclick="testGoogleSheetsConnection()">▶ Probar conexión</button>
         <button class="s" onclick="syncAllToGoogleSheets()">📤 Sincronizar todos los aspirantes</button>
+        <button class="s" onclick="
+          const v = $('#inpSheetUrl').value.trim();
+          if(!v) return toast('Ingresa una URL primero.');
+          navigator.clipboard.writeText('const DEFAULT_SHEET_URL = \\'' + v + '\\';');
+          toast('📋 Línea copiada para js/config.js');
+        ">📋 Copiar código para GitHub</button>
       </p>
 
       <hr style="border:0;border-top:1px solid var(--bd);margin:20px 0">

@@ -70,13 +70,15 @@ function save() {
 
 /**
  * Resolves the configured Google Sheets Webhook URL.
+ * Prioritizes the repository-level DEFAULT_SHEET_URL so GitHub deployments
+ * share the exact same sheet across all devices, falling back to local storage.
  */
 function getGoogleSheetUrl() {
-  if (D && D.sheetUrl && D.sheetUrl.trim()) {
-    return D.sheetUrl.trim();
-  }
   if (typeof DEFAULT_SHEET_URL !== 'undefined' && DEFAULT_SHEET_URL.trim()) {
     return DEFAULT_SHEET_URL.trim();
+  }
+  if (D && D.sheetUrl && D.sheetUrl.trim()) {
+    return D.sheetUrl.trim();
   }
   return '';
 }
