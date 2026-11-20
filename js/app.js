@@ -101,6 +101,10 @@ function R() {
     `;
   } else if (S.v == 'admin') {
     b = admin();
+    if (S.tab == 'att' && (!D.att || D.att.length === 0) && getGoogleSheetUrl() && !S.hasAutoFetched) {
+      S.hasAutoFetched = true;
+      setTimeout(() => fetchAttemptsFromGoogleSheets(true).then(() => R()), 100);
+    }
   } else if (S.v == 'rep') {
     b = rep(D.att.find(a => a.id == S.ra));
   }
@@ -149,6 +153,12 @@ async function doLoginPin() {
       S.v = 'admin';
       R();
       toast('Acceso concedido (' + (res.source || 'Seguro') + ').');
+      // Sincronizar automáticamente aspirantes desde Google Sheets en segundo plano
+      if (getGoogleSheetUrl()) {
+        fetchAttemptsFromGoogleSheets(true).then(() => {
+          if (S.v === 'admin' && S.tab === 'att') R();
+        });
+      }
     } else {
       S.failedPinAttempts = (S.failedPinAttempts || 0) + 1;
       if (S.failedPinAttempts >= 4) {

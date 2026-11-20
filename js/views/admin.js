@@ -235,22 +235,44 @@ function admin() {
 
   // Aspirantes / Attempts Tab
   if (S.tab == 'att') {
-    h += `<div class="c"><div class="t" style="margin-bottom:10px">
-      <button class="s" onclick="syncAllToGoogleSheets()">📤 Sincronizar con Google Sheets</button>
-    </div><div class="ov"><table><tr><th>Aspirante</th><th>Grado</th><th>Fecha</th><th>Nivel</th><th>Estado</th><th></th></tr>${
-      D.att
-        .map(a => {
-          const r = an(a);
-          return `<tr><td>${esc(a.n)}</td><td>${G[a.g]}</td><td>${new Date(
-            a.d
-          ).toLocaleDateString('es-CO')}</td><td>${L[r.lv]} · ${r.pct}%</td><td>${
-            r.pend ? 'Pendiente docente' : 'Completo'
-          }</td><td><button onclick="S.v='rep';S.ra='${a.id}';R()">Abrir</button> <button class="d" onclick="cf('a${
-            a.id
-          }',()=>{D.att=D.att.filter(x=>x.id!='${a.id}');save();R()})">✕</button></td></tr>`;
-        })
-        .join('') || '<tr><td colspan="6">Aún no hay aspirantes.</td></tr>'
-    }</table></div></div>`;
+    h += `<div class="c">
+      <div class="t" style="margin-bottom:12px;justify-content:space-between">
+        <div class="t">
+          <button class="s" onclick="fetchAttemptsFromGoogleSheets()">🔄 Actualizar desde Google Sheets</button>
+          <button class="s" onclick="syncAllToGoogleSheets()">📤 Subir locales a Google Sheets</button>
+        </div>
+        <span class="tag" style="background:#e8f0ff;color:var(--pr)">
+          ${D.att.length} aspirante(s) disponible(s)
+        </span>
+      </div>
+      <div class="ov">
+        <table>
+          <tr>
+            <th>Aspirante</th>
+            <th>Grado</th>
+            <th>Fecha</th>
+            <th>Nivel</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+          ${
+            D.att
+              .map(a => {
+                const r = an(a);
+                return `<tr><td><b>${esc(a.n)}</b></td><td>${G[a.g] || a.g}</td><td>${new Date(
+                  a.d
+                ).toLocaleDateString('es-CO')}</td><td>${L[r.lv]} · ${r.pct}%</td><td>${
+                  r.pend ? '<span class="tag" style="background:var(--wa);color:#fff">Pendiente docente</span>' : '<span class="tag" style="background:#e2f6ea;color:#137333">Completo</span>'
+                }</td><td><button onclick="S.v='rep';S.ra='${a.id}';R()">Abrir</button> <button class="d" onclick="cf('a${
+                  a.id
+                }',()=>{D.att=D.att.filter(x=>x.id!='${a.id}');save();R()})">✕</button></td></tr>`;
+              })
+              .join('') ||
+            '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--mu)">No hay aspirantes guardados en este navegador.<br><button class="s" style="margin-top:8px" onclick="fetchAttemptsFromGoogleSheets()">🔄 Cargar aspirantes desde Google Sheets</button></td></tr>'
+          }
+        </table>
+      </div>
+    </div>`;
   }
 
   // Question Bank Tab

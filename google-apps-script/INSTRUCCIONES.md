@@ -39,6 +39,18 @@ Esta guía explica paso a paso cómo conectar tu aplicación **English Placement
 
 ---
 
+### Cómo actualizar el código en Google Apps Script manteniendo la misma URL
+
+Cuando actualices el código de [`Code.gs`](file:///home/ing-edgardo-ramos/Documentos/ingles/google-apps-script/Code.gs):
+1. Pega el nuevo código en el editor de Apps Script y haz clic en **Guardar** (💾).
+2. Haz clic en **Implementar** (*Deploy*) > **Administrar implementaciones** (*Manage deployments*).
+3. Selecciona la implementación activa y haz clic en el ícono del **Lápiz (Editar ✏️)** en la esquina superior derecha.
+4. En el menú desplegable **Versión**, selecciona **Nueva versión** (*New version*).
+5. Haz clic en **Implementar** (*Deploy*).
+*(Al elegir "Nueva versión" la URL se mantiene exactamente igual, sin necesidad de cambiar nada en la aplicación).*
+
+---
+
 ### Paso 4: Configurar la URL en la Aplicación
 
 Tienes dos formas de configurarla:

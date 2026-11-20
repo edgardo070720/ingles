@@ -256,3 +256,52 @@ async function changeTeacherPin(currentPin, newPin, confirmPin) {
   save();
   return { ok: true, message: '✅ PIN actualizado localmente (conecta Google Sheets para sincronizarlo en la nube).' };
 }
+
+/**
+ * Fetches all applicant attempts stored in Google Sheets and updates local state.
+ */
+async function fetchAttemptsFromGoogleSheets(silent = false) {
+  const url = getGoogleSheetUrl();
+  if (!url) {
+    if (!silent) toast('No hay URL de Google Sheets configurada.');
+    return { ok: false, error: 'Sin URL' };
+  }
+
+  if (!silent) toast('Consultando aspirantes en Google Sheets...');
+  try {
+    const fetchUrl = `${url}?action=getAttempts`;
+    const response = await fetch(fetchUrl, { method: 'GET' });
+    const result = await response.json();
+
+    if (result && result.status === 'success' && Array.isArray(result.attempts)) {
+      const localMap = new Map((D.att || []).map(a => [a.id, a]));
+      let newCount = 0;
+
+      result.attempts.forEach(remote => {
+        if (!localMap.has(remote.id)) {
+          localMap.set(remote.id, remote);
+          newCount++;
+        } else {
+          const local = localMap.get(remote.id);
+          localMap.set(remote.id, { ...local, ...remote });
+        }
+      });
+
+      D.att = Array.from(localMap.values()).sort((a, b) => new Date(b.d) - new Date(a.d));
+      save();
+
+      if (!silent) {
+        toast(`✅ Sincronizado: ${D.att.length} aspirante(s) disponibles.`);
+        R();
+      }
+      return { ok: true, count: D.att.length, newCount };
+    } else {
+      if (!silent) toast('No se pudieron obtener los aspirantes de Google Sheets.');
+      return { ok: false, error: 'Respuesta inválida' };
+    }
+  } catch (err) {
+    console.error('Error al sincronizar desde Google Sheets:', err);
+    if (!silent) toast('Error al conectar con Google Sheets: ' + err.message);
+    return { ok: false, error: err.message };
+  }
+}

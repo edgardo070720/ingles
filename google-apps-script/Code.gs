@@ -85,13 +85,38 @@ function handleAction(ss, data) {
     return jsonResponse({ status: 'success', message: 'Conexión exitosa' });
   }
   
-  // 4. Registro de resultados del aspirante (Submit)
+  // 4. Obtener todos los aspirantes registrados para sincronizar con el panel docente
+  if (action === 'getAttempts') {
+    return getAttemptsFromSheet(ss);
+  }
+
+  // 5. Registro o actualización de resultados del aspirante (Submit)
   var evalSheet = ss.getSheetByName('Evaluaciones') || ss.getActiveSheet();
   setupEvaluacionesSheet(evalSheet);
+  saveOrUpdateAttempt(evalSheet, data);
   
+  return jsonResponse({ status: 'success', message: 'Evaluación registrada correctamente.' });
+}
+
+/**
+ * Guarda o actualiza la fila de un aspirante en la hoja de cálculo (evita duplicados).
+ */
+function saveOrUpdateAttempt(sheet, data) {
   var fecha = data.timestamp ? new Date(data.timestamp) : new Date();
-  
-  evalSheet.appendRow([
+  var lastRow = sheet.getLastRow();
+  var targetRow = -1;
+
+  if (lastRow > 1 && data.id) {
+    var idValues = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    for (var i = 0; i < idValues.length; i++) {
+      if (String(idValues[i][0]).trim() === String(data.id).trim()) {
+        targetRow = i + 2;
+        break;
+      }
+    }
+  }
+
+  var rowData = [
     fecha,
     data.id || '',
     data.studentName || '',
@@ -107,9 +132,67 @@ function handleAction(ss, data) {
     data.speakingAudio || '',
     data.teacherNotes || '',
     data.rawData || ''
-  ]);
-  
-  return jsonResponse({ status: 'success', message: 'Evaluación registrada correctamente.' });
+  ];
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 1, 1, rowData.length).setValues([rowData]);
+  } else {
+    sheet.appendRow(rowData);
+  }
+}
+
+/**
+ * Lee todos los aspirantes registrados en la hoja de cálculo y los retorna en JSON.
+ */
+function getAttemptsFromSheet(ss) {
+  var sheet = ss.getSheetByName('Evaluaciones') || ss.getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return jsonResponse({ status: 'success', attempts: [] });
+  }
+
+  var values = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
+  var attempts = [];
+
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var id = String(row[1] || '').trim();
+    if (!id || id === 'TEST-PING') continue;
+
+    var rawDataStr = String(row[14] || '').trim();
+    var attempt = null;
+
+    if (rawDataStr && rawDataStr.charAt(0) === '{') {
+      try {
+        attempt = JSON.parse(rawDataStr);
+      } catch (e) {}
+    }
+
+    if (!attempt || !attempt.id) {
+      var gStr = String(row[3] || '');
+      var gMatch = gStr.match(/\d+/);
+      var gNum = gMatch ? parseInt(gMatch[0], 10) : 1;
+
+      attempt = {
+        id: id,
+        n: String(row[2] || 'Aspirante'),
+        g: gNum,
+        d: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(),
+        res: [],
+        open: [],
+        rub: {},
+        note: String(row[13] || '')
+      };
+    } else {
+      if (row[13]) attempt.note = String(row[13]);
+    }
+
+    attempts.push(attempt);
+  }
+
+  // Ordenar del más reciente al más antiguo
+  attempts.reverse();
+  return jsonResponse({ status: 'success', attempts: attempts });
 }
 
 // ============================================================================
